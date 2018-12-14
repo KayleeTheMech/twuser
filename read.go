@@ -6,7 +6,8 @@ import (
 	"net/url"
 	"strconv"
 
-	"de.missqarnstein.twitterutils/fileutil"
+	"twuser/fileutil"
+
 	"github.com/ChimeraCoder/anaconda"
 )
 
@@ -48,6 +49,10 @@ func main() {
 		ids = fileutil.ReadTwitterIdsFromFilesInPath(*dirPtr)
 	} else {
 		fmt.Println("A source of twitter ids has to be given")
+		fmt.Println("Possibilities:")
+		fmt.Println("--dir PATH: where PATH directs to a folder containing files with twitter ids")
+		fmt.Println("--file FILE: where FILE directs to a file containing twitter ids")
+		fmt.Println("--id ID: where ID is a twitter id")
 		return
 	}
 
