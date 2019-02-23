@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"time"
 
 	"github.com/ChimeraCoder/anaconda"
 	"github.com/kayleethemech/twuser/fileutil"
@@ -29,17 +30,16 @@ func main() {
 	// sanitizing the input
 
 	// mode
+
 	switch mode {
 	case "block", "unblock", "mute", "unmute":
 		//continue
 	case "":
 		fmt.Println("Godess, instruct us with a mode setting please.")
-		return
 	default:
-		fmt.Println("mode options are block, unblock, mute, or unmute")
+		fmt.Println("mode options are block, unblock, mute, or unmute, was", mode)
 		return
 	}
-
 	// Source of Ids
 	var ids []int64
 	if *idPtr != "" {
@@ -70,33 +70,31 @@ func main() {
 	switch mode {
 	case "block":
 		fmt.Println("We're blocking for you..")
-		for _, id := range ids {
-			fmt.Println("Blocking user: ", id)
-			api.BlockUserId(id, v)
-		}
+		doIterate("Blocking user:", ids, api.BlockUserId, v)
 	case "unblock":
 		fmt.Println("We're unblocking users..")
-		for _, id := range ids {
-			fmt.Println("Unblocking user: ", id)
-			api.UnblockUserId(id, v)
-		}
+		doIterate("Unblocking user:", ids, api.UnblockUserId, v)
 	case "mute":
 		fmt.Println("We're muting users..")
-		for _, id := range ids {
-			fmt.Println("Muting user: ", id)
-			api.MuteUserId(id, v)
-		}
+		doIterate("Muting user:", ids, api.MuteUserId, v)
 	case "unmute":
 		fmt.Println("We're unmuting users..")
-		for _, id := range ids {
-			fmt.Println("Unblocking user: ", id)
-			api.UnmuteUserId(id, v)
-		}
+		doIterate("Unblocking user:", ids, api.UnmuteUserId, v)
 	default:
 		fmt.Println("mode options are block, unblock, mute, or unmute")
 	}
 	fmt.Println("Done.")
 
+}
+
+type apiAction func(int64, url.Values) (anaconda.User, error)
+
+func doIterate(output string, ids []int64, action apiAction, v url.Values) {
+	for _, id := range ids {
+		fmt.Println(output, id)
+		action(id, v)
+		time.Sleep(time.Second)
+	}
 }
 
 type TwuserConfig struct {
