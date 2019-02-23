@@ -6,12 +6,14 @@ import (
 	"net/url"
 	"strconv"
 
-	"twuser/fileutil"
-
 	"github.com/ChimeraCoder/anaconda"
+	"github.com/kayleethemech/twuser/fileutil"
+	"github.com/spf13/viper"
 )
 
 func main() {
+	appConfig := TwuserConfig{}
+	appConfig.readConfig()
 	// --mode can be block/unblock/mute/unmute
 	var mode string
 	flag.StringVar(&mode, "mode", "notgiven", "a string")
@@ -27,10 +29,13 @@ func main() {
 	// sanitizing the input
 
 	// mode
-	if mode == "" {
+	switch mode {
+	case "block", "unblock", "mute", "unmute":
+		//continue
+	case "":
 		fmt.Println("Godess, instruct us with a mode setting please.")
 		return
-	} else if !(mode != "block" || mode != "unblock" || mode != "mute" || mode != "unmute") {
+	default:
 		fmt.Println("mode options are block, unblock, mute, or unmute")
 		return
 	}
@@ -57,7 +62,7 @@ func main() {
 	}
 
 	//--------------------------//
-	api := anaconda.NewTwitterApiWithCredentials(accessToken, accessSecret, appApiKey, appApiSecret)
+	api := anaconda.NewTwitterApiWithCredentials(appConfig.accessToken, appConfig.accessSecret, appConfig.appApiKey, appConfig.appApiSecret)
 
 	fmt.Println("Welcome Misses, we're humbly at your service.")
 	v := url.Values{}
@@ -92,4 +97,25 @@ func main() {
 	}
 	fmt.Println("Done.")
 
+}
+
+type TwuserConfig struct {
+	appApiKey    string
+	appApiSecret string
+	accessToken  string
+	accessSecret string
+}
+
+func (config *TwuserConfig) readConfig() {
+	viper.SetConfigType("yaml")
+	viper.SetConfigName("twitterapi")
+	viper.AddConfigPath("$HOME/.twuser/")
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(fmt.Errorf("Error reading config: %s \n", err))
+	}
+	config.appApiKey = viper.GetString("ApiKey")
+	config.appApiSecret = viper.GetString("ApiSecret")
+	config.accessToken = viper.GetString("Token")
+	config.accessSecret = viper.GetString("Secret")
 }
